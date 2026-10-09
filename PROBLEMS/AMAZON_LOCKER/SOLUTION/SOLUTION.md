@@ -1,5 +1,6 @@
 # Resource(s):
 
+
 https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker
 
 
@@ -70,6 +71,7 @@ Unnecessary to Current Set of Requirements
 # STEP 3: CLASS DESIGN
 
 
+```text
 class Locker:
     - compartments: Compartment[]
     - accessTokenMapping: Dictionary<string, AccessToken>
@@ -78,8 +80,9 @@ class Locker:
     + DepositPackage(Size) -> string | error
     + PickUp(AccessToken) -> void | error
     + OpenExpiredCompartments() -> void
+```
 
-
+```text
 class AccessToken:
     - code: string
     - expiration: TimeStamp/DateTime
@@ -89,8 +92,9 @@ class AccessToken:
     + IsExpired() -> boolean
     + GetCompartment() -> Compartment
     + GetCode() -> string
+```
 
-
+```text
 class Compartment:
     - size: Size
     - occupied: boolean
@@ -101,17 +105,20 @@ class Compartment:
     + MarkOccupied() -> void
     + MarkFree() -> void
     + Open() -> void
+```
 
-
+```text
 enum Size:
     SMALL 
     MEDIUM 
     LARGE 
+```
 
 
 # STEP 4: IMPLEMENTATION
 
 
+```text
 class Locker:
    public string DepositPackage(Size):
       """
@@ -197,6 +204,7 @@ class Locker:
 
       accessTokenMapping.Remove(Code)
 
+
    public void OpenExpiredCompartments():
       """
       Core Logic:
@@ -225,6 +233,7 @@ class Locker:
             // Don't remove from accessTokenMapping so they still get correct error 
 
          // Loop to clear out the accessToken from the map that are 3month+ old
+```
 
 
 # STEP 5: EXTENSIBILITY
@@ -233,6 +242,7 @@ class Locker:
 1. What if we want to allow a smaller package to use a large compartment as a fallback when all 
    exact-size compartments are full?
 
+```text
 private GetAvailableCompartment(RequestedSize):
    sizesInOrder = [SMALL, MEDIUM, LARGE]
 
@@ -246,16 +256,18 @@ private GetAvailableCompartment(RequestedSize):
             return c 
 
    return null
-
+```
 
 2. How would you handle compartments that are broken or under maintenance?
 
+```text
 enum CompartmentStatus:
    AVAILABLE 
    OCCUPIED 
    OUT_OF_SERVICE
+```
 
-
+```text
 class Compartment:
    - size: Size
    - status: CompartmentStatus
@@ -266,30 +278,34 @@ class Compartment:
    + MarkOutOfService() -> void
    OR 
    + UpdateStatus(CompartmentStatus.STATUS) -> void
-
+```
 
 3. How would you ensure packages are actually deposited before generating access tokens?
 
 Two-Phased Commit 
 
+```text
 class Locker:
    + ReserveCompartment(Size) -> reservationId
    + ConfirmDeposit(Reservationld) —> tokenCode
    + CancelReservation(Reservationld) -> void
+```
 
-
+```text
 class Compartment:
    - size: Size
    - status: CompartmentStatus // AVAILABLE, RESERVED, OCCUPIED, OUT_OF_SERVICE
+```
 
-
+```text
 enum CompartmentStatus:
    AVAILABLE
    RESERVED
    OCCUPIED
    OUT_OF_SERVICE
+```
 
-
+```text
 public GUID ReserveCompartment(Size):
    compartment = GetAvailableCompartment(Size)
 
@@ -305,8 +321,9 @@ public GUID ReserveCompartment(Size):
    reservationMapping[reservationId] = compartment
 
    return reservationId
+```
 
-
+```text
 public string ConfirmDeposit(GUID ReservationId):
    compartment = reservationMapping[reservationId]
 
@@ -322,3 +339,4 @@ public string ConfirmDeposit(GUID ReservationId):
    reservationMapping.Remove(reservationId)
 
    return accessToken.GetCode()
+```
