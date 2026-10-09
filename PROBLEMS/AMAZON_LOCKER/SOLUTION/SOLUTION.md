@@ -262,6 +262,7 @@ private GetAvailableCompartment(RequestedSize):
    return null
 ```
 
+
 2. How would you handle compartments that are broken or under maintenance?
 
 ```text
@@ -284,6 +285,7 @@ class Compartment:
    OR 
    + UpdateStatus(CompartmentStatus.STATUS) -> void
 ```
+
 
 3. How would you ensure packages are actually deposited before generating access tokens?
 
