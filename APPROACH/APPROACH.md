@@ -1,4 +1,4 @@
-STEPS:
+# STEPS:
 
 1. Requirements
 
@@ -11,7 +11,7 @@ STEPS:
 5. Extensibility
 
 
-NOTE/TIPS:
+# TIPS:
 
 Requirements:
 
@@ -63,6 +63,7 @@ Implementation:
 3. Prefer adding the helper behavior/methods as you go, decide with interviewer if those needs an implementation
    - Helpers mostly have Private Visibility
 
-NOTE:
+
+# NOTE:
 
 You can always go back and modify Entities/Class Design/Implementation upon discussion with interviewer.
