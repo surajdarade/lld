@@ -12,5 +12,5 @@ To convert vague problem statement into concrete requirements,
 write it in below format:
 
     1. Primary Capabilities
-    2. Out of Scope
-    3. Error/Edge Case Handling
+    2. Error/Edge Case Handling
+    3. Out of Scope
