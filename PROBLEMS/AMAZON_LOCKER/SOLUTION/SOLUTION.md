@@ -1,18 +1,12 @@
-Resource(s):
+# Resource(s):
 
 https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker
-
-
-------------------------------------------------------------------------------------------------------
 
 
 Problem Statement:
 
 Design a Locker System like Amazon Locker where delivery drivers can deposit
 packages and customers can pick them up using a code.
-
-
-------------------------------------------------------------------------------------------------------
 
 
 Primary Capabilities:
@@ -32,10 +26,7 @@ Scope Boundaries:
 from when the driver arrives at the locker until the customer picks up? 
 
 
-------------------------------------------------------------------------------------------------------
-
-
-STEP 1: REQUIREMENTS
+# STEP 1: REQUIREMENTS
 
 
 1. Carries deposits a package by specifying size (small, medium, large)
@@ -63,26 +54,20 @@ Out of Scope:
 - How the access token reaches the customer (sms/email notification)
 
 
-------------------------------------------------------------------------------------------------------
-
-
-STEP 2: ENTITIES
+# STEP 2: ENTITIES
 
 
 - Compartment
 - Locker
 - AccessToken
 
-# Unnecessary to Current Set of Requirements
+Unnecessary to Current Set of Requirements
 - Carrier/Driver
 - User
 - Package
 
 
-------------------------------------------------------------------------------------------------------
-
-
-STEP 3: CLASS DESIGN
+# STEP 3: CLASS DESIGN
 
 
 class Locker:
@@ -124,10 +109,7 @@ enum Size:
     LARGE 
 
 
-------------------------------------------------------------------------------------------------------
-
-
-STEP 4: IMPLEMENTATION
+# STEP 4: IMPLEMENTATION
 
 
 class Locker:
@@ -245,11 +227,7 @@ class Locker:
          // Loop to clear out the accessToken from the map that are 3month+ old
 
 
-
-------------------------------------------------------------------------------------------------------
-
-
-STEP 5: EXTENSIBILITY
+# STEP 5: EXTENSIBILITY
 
 
 1. What if we want to allow a smaller package to use a large compartment as a fallback when all 
