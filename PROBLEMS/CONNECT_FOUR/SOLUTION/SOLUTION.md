@@ -247,3 +247,111 @@ class Board:
 
         return count
 ```
+
+
+# STEP 5: EXTENSIBILITY
+
+
+1. How would you support different board sizes?
+
+Construct the board with desired rows and columns
+
+
+2. How would you add undo or move history?
+
+Undo belongs in `Game` because `Game` controls the lifecycle, turn order and when state changes
+I'd keep a `moveHistory` stack. Each time a move succeeds, I push a small `Move` record containing player, row and column
+Undo would pop the last move, clear that cell in the board, revent `currentPlayer` and recalculate game state if needed
+The board does'nt need any new logic besides maybe an internal `ClearCell` method
+
+
+```text
+class Move:
+    - player: Player
+    - row: int
+    - column: int
+
+    + Move(player, row, column)
+```
+
+
+```text
+class Game:
+    moveHistory: Stack<Move>
+
+    public boolean MakeMove(player, column):
+        // PREVIOUS LOGIC
+
+        row = board.PlaceDisc(column, player.GetColor())
+
+        moveHistory.Push(Move(player, row, column))
+
+        // PREVIOUS LOGIC
+
+
+    public bool Undo():
+        if (moveHistory.IsEmpty())
+            return false
+
+        last = moveHistory.Pop()
+
+        // REVERT MOVE
+        board.ClearCell(last.row, last.column)
+
+        // REVERT TURN ORDER
+        currentPlayer = last.player
+
+        // RECOMPUTE GAME STATE, SIMPLEST VERSION
+        state = GameState.IN_PROGRESS
+
+        winner = null
+
+        return true
+```
+
+3. How would you add a computer opponent?
+
+I'd keep the game reuls exactly where they are. `Game` and `Board` doesn't need to change
+I'd introduce a small bot component that looks at the current board and returns a column
+From `Game's` persepctive, a bot move is just another call to `MakeMove(currentPlayer, column)`
+
+
+```text
+game = Game(humanPlayer, botPlayer)
+
+while (game.GetGameState() == Gametate.IN_PROGRESS)
+    currentPlayer = game.GetCurrentPlayer()
+
+    column = // input from UI
+
+    game.MakeMove(currentPlayer, column)
+```
+
+
+```text
+class BotEngine:
+    + ChooseMove(game, bot) -> int
+```
+
+
+```text
+game = Game(humanPlayer, botPlayer)
+
+bot = BotEngine()
+
+while (game.GetGameState() == GameState.IN_PROGRESS)_
+    currentPlayer = game.GetCurrentPlayer()
+
+    if (currentPlayer == humanPlayer)
+        column = // input from UI
+
+    else 
+        column = bot.ChooseMove(game, currentPlayer)
+
+    game.MakeMove(currentPlayer, column)
+```
+
+
+Optional:
+
+Might introduce `Player` interface and concrete implementations, `HumanPlayer` or `BotPlayer`, etc
