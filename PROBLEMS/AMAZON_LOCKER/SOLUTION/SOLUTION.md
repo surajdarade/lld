@@ -83,6 +83,7 @@ class Locker:
     + OpenExpiredCompartments() -> void
 ```
 
+
 ```text
 class AccessToken:
     - code: string
@@ -94,6 +95,7 @@ class AccessToken:
     + GetCompartment() -> Compartment
     + GetCode() -> string
 ```
+
 
 ```text
 class Compartment:
@@ -107,6 +109,7 @@ class Compartment:
     + MarkFree() -> void
     + Open() -> void
 ```
+
 
 ```text
 enum Size:
@@ -268,6 +271,7 @@ enum CompartmentStatus:
    OUT_OF_SERVICE
 ```
 
+
 ```text
 class Compartment:
    - size: Size
@@ -292,11 +296,13 @@ class Locker:
    + CancelReservation(Reservationld) -> void
 ```
 
+
 ```text
 class Compartment:
    - size: Size
    - status: CompartmentStatus // AVAILABLE, RESERVED, OCCUPIED, OUT_OF_SERVICE
 ```
+
 
 ```text
 enum CompartmentStatus:
@@ -305,6 +311,7 @@ enum CompartmentStatus:
    OCCUPIED
    OUT_OF_SERVICE
 ```
+
 
 ```text
 public GUID ReserveCompartment(Size):
@@ -323,6 +330,7 @@ public GUID ReserveCompartment(Size):
 
    return reservationId
 ```
+
 
 ```text
 public string ConfirmDeposit(GUID ReservationId):
