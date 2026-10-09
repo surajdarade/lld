@@ -29,7 +29,7 @@ from when the driver arrives at the locker until the customer picks up?
 # STEP 1: REQUIREMENTS
 
 
-1. Carries deposits a package by specifying size (small, medium, large)
+1. Carrier deposits a package by specifying size (small, medium, large)
    - System assigns an available compartment of matching size
    - Opens compartment and returns access token, or error if no space
 
