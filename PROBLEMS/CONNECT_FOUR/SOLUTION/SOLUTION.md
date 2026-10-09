@@ -94,8 +94,8 @@ class Board:
     + PlaceDisc(column, color) -> int // return row the disc lands in or -1
     + IsFull() -> boolean
     + CheckWin(row, column, color) -> boolean
-    + GetRow() -> int
-    + GetCol() -> int
+    + GetRows() -> int
+    + GetCols() -> int
     + GetCell() -> DiscColor?
 ```
 
@@ -115,4 +115,135 @@ class Player:
     + Player(name, color)
     + GetName() -> string
     + GetColor() -> DiscColor
+```
+
+
+# STEP 4: IMPLEMENTATION
+
+
+```text
+class Game:
+    public boolean MakeMove(player, column):
+        """
+        Core Logic:
+        1. Place Disc
+        2. Check Win
+        3. If not, check for a Draw
+        4. Switch Turns
+
+        Error/Edge Case(s):
+        1. Game already over
+        2. Wrong player turn
+
+        - this is actually board
+        - column index out of bounds
+        - column is full
+        """
+
+        if (state != GameState.IN_PROGRESS)
+            return false
+
+        if (player != currentPlayer)
+            return false
+
+        row = board.PlaceDisc(column, player.GetColor())
+        
+        if (row == -1)
+            return false
+
+        if (board.CheckWin(row, column, player.GetColor())
+            state = GameState.WON
+            winner = player
+
+        else if (board.IsFull())
+            return state = GameState.DRAW
+
+        else 
+            currentPlayer = (player == player1) ? player2 : player1
+
+        return true
+```
+
+
+```text
+class Board:
+    public int PlaceDisc(column, color):
+        """
+        Core Logic:
+        1. Find the lowest empty row for that column
+        2. Place Disc
+        3. Return the row it landed in
+
+        Error/Edge Case(s):
+        1. Column index out of bounds
+        2. Column is full
+        """
+
+        if (column < 0 || column >= board.GetCols()) 
+            return -1
+
+        if(!board.CanPlace(column))
+            return -1
+
+        for row = board.GetRows() - 1 to 0
+            if (grid[row][column] == null)
+                grid[row][column] = color
+
+                return row
+
+        return -1
+
+    
+    public boolean CheckWin(row, column, color):
+        """
+        Core Logic:
+        1. Check for four in a row in all for directions
+        2. Return true if found, false otherwise
+
+        Error/Edge Case(s):
+        1. Row or column out of bounds -> return false
+        2. Cell at (row, column) doesn't match color -> return false
+        """
+
+        if (r < 0 || r >= board.GetRows() || c < 0 || c >= board.GetCols())
+            return false
+
+        if (board.GetCell(row, column) != color)
+            return false
+
+        directions = [
+            [0, 1], // horizontal
+            [1, 0], // vertical 
+            [1, 1], // diagonal
+            [-1, 1] // other diagonal
+        ]
+
+        for dr, dc in directions
+            count = 1
+
+            count += CountInDirection(row, column, dr, dc, color) // move in one direction
+            
+            count += CountInDirection(row, column, -dr, -dc, color) // move in one direction 
+
+            if (count >= 4)
+                return true
+
+            return false
+
+    
+    public int CountInDirection(row, column, dr, dc, color):
+        count = 0
+
+        r = row + dr
+
+        c = column + dc
+
+        while (r >= 0 && r < board.GetRows() && c >= 0 && c < board.GetCols() && board.GetCell(r, c) == color)
+            count++
+
+            r += dr
+
+            c += dc
+
+        return count
 ```
