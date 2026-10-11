@@ -1,10 +1,10 @@
-# Resource(s):
+# RESOURCE(S)
 
 
 https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/connect-four
 
 
-# Problem Statement:
+# PROBLEM STATEMENT
 
 
 Build a two-player Connect Four Game. Players take turns dropping discs into a 7-column, 6-row board.

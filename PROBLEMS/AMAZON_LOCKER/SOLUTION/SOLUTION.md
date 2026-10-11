@@ -1,10 +1,10 @@
-# Resource(s):
+# RESOURCE(S)
 
 
 https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker
 
 
-# Problem Statement:
+# PROBLEM STATEMENT
 
 
 Design a Locker System like Amazon Locker where delivery drivers can deposit
