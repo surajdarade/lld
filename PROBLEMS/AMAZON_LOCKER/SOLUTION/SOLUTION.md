@@ -50,6 +50,7 @@ from when the driver arrives at the locker until the customer picks up?
    - System opens all compartments with expired tokens
    - Staff physically removes packages and returns them to sender
 
+
 Out of Scope:
 
 - How the package gets to the locker (delivery logistics)

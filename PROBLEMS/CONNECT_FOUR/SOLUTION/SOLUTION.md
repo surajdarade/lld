@@ -34,6 +34,7 @@ Scope Boundaries:
    - Moving out of turn.
    - Moving after the game is over.
 
+
 Out of scope: 
 
 - UI support
