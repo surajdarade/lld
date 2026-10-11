@@ -1,4 +1,4 @@
-# STEPS:
+# APPROACH:
 
 1. Requirements
 
