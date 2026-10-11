@@ -1,5 +1,5 @@
 public enum GameState {
-    InProgress,
-    Won,
-    Draw
+    IN_PROGRESS,
+    WON,
+    DRAW
 }
