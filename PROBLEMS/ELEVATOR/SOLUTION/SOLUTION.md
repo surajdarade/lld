@@ -78,3 +78,52 @@ Scope Boundaries:
 # STEP 3: CLASS DESIGN
 
 
+```text
+class ElevatorController:
+    - elevators: List<Elevator>
+
+    + ElevatorController()
+    + RequestElevator(floor, type) -> boolean
+    + Step() -> void
+```
+
+
+```text
+class Elevator:
+   - currentFloor: int
+   - direction: Direction
+   - requests: Set<Request>
+
+   + Elevator() 
+   + AddRequest(request)
+   + Step() -> void
+   + GetCurrentFloor() -> int
+   + GetDirection() -> Direction
+```
+
+
+```text
+enum Direction:
+   UP
+   DOWN
+   IDLE
+```
+
+
+```text
+class Request:
+   - floor: int
+   - type: RequestType
+
+   + Request(floor, type)
+   + GetFloor() -> int
+   + GetType() -> RequestType
+```
+
+
+```text
+enum RequestType:
+   PICKUP_UP
+   PICKUP_DOWN
+   DESTINATION
+```
