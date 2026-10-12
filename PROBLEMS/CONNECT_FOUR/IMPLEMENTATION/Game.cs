@@ -11,11 +11,11 @@ public class Game {
         _player1 = player1;
         _player2 = player2;
         _currentPlayer = player1;
-        _state = GameState.InProgress;
+        _state = GameState.IN_PROGRESS;
     }
 
     public bool MakeMove(Player player, int column) {
-        if (_state != GameState.InProgress) {
+        if (_state != GameState.IN_PROGRESS) {
             return false;
         }
 
@@ -29,11 +29,11 @@ public class Game {
         }
 
         if (_board.CheckWin(row, column, player.Color)) {
-            _state = GameState.Won;
+            _state = GameState.WON;
             _winner = player;
         }
         else if (_board.IsFull()){
-            _state = GameState.Draw;
+            _state = GameState.DRAW;
         }
         else {
             _currentPlayer = _currentPlayer == _player1 ? _player2 : _player1;

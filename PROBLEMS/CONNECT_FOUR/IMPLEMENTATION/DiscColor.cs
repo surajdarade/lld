@@ -1,4 +1,5 @@
 public enum DiscColor {
-    Red,
-    Yellow
+    RED,
+    
+    YELLOW
 }
