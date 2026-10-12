@@ -310,6 +310,7 @@ class Game:
         return true
 ```
 
+
 3. How would you add a computer opponent?
 
 I'd keep the game reuls exactly where they are. `Game` and `Board` doesn't need to change
