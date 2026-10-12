@@ -11,11 +11,11 @@ Build a two-player Connect Four Game. Players take turns dropping discs into a 7
 The first to align four of their own discs vertically or horizontally or diagonally wins.
 
 
-Primary Capabilities:
+**Primary Capabilities:**
 
-Error/Edge Case Handling:
+**Error/Edge Case Handling:**
 
-Scope Boundaries:
+**Scope Boundaries:**
 
 
 # STEP 1: REQUIREMENTS
@@ -35,7 +35,7 @@ Scope Boundaries:
    - Moving after the game is over.
 
 
-Out of scope: 
+**Out of scope: **
 
 - UI support
 - Concurrent games
@@ -51,7 +51,7 @@ Out of scope:
 - Board
 - Player
 
-Unnecessary to Current Set of Requirements
+**Unnecessary to Current Set of Requirements**
 - Disc
 
 
@@ -353,6 +353,6 @@ while (game.GetGameState() == GameState.IN_PROGRESS)_
 ```
 
 
-Optional:
+**Optional:**
 
 Might introduce `Player` interface and concrete implementations, `HumanPlayer` or `BotPlayer`, etc

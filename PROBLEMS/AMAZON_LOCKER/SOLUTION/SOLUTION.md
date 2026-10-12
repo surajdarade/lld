@@ -11,18 +11,18 @@ Design a Locker System like Amazon Locker where delivery drivers can deposit
 packages and customers can pick them up using a code.
 
 
-Primary Capabilities:
+**Primary Capabilities:**
 
 - Are there different sized compartments?
 - How does the customer get their code? Do we need to send an SMS or Email?
 
-Error/Edge Case Handling:
+**Error/Edge Case Handling:**
 
 - Can one customer have multiple packages in the system at once? Are access tokens uniqye per package?
 - Low long the codes last? What happens to a package if it's never picked up?
 - What if all compartments of a given size are full when a driver tries to deposit?
 
-Scope Boundaries:
+**Scope Boundaries:**
 
 - What's in scope for this system? Are we modelling the whole delivery flow, or just the piece
 from when the driver arrives at the locker until the customer picks up? 
@@ -51,7 +51,7 @@ from when the driver arrives at the locker until the customer picks up?
    - Staff physically removes packages and returns them to sender
 
 
-Out of Scope:
+**Out of Scope:**
 
 - How the package gets to the locker (delivery logistics)
 - How the access token reaches the customer (sms/email notification)
@@ -64,7 +64,7 @@ Out of Scope:
 - Locker
 - AccessToken
 
-Unnecessary to Current Set of Requirements
+**Unnecessary to Current Set of Requirements**
 - Carrier/Driver
 - User
 - Package

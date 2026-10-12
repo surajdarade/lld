@@ -13,7 +13,7 @@
 
 # TIPS:
 
-Requirements:
+**Requirements:**
 
 1. To convert vague problem statement into concrete requirements, write it in below format:
    - Primary Capabilities
@@ -21,7 +21,7 @@ Requirements:
    - Out of Scope
 
 
-Entities:
+**Entities:**
 
 1. Identify Entities from Concrete Requirements
    - Typically Nouns
@@ -31,7 +31,7 @@ Entities:
 3. When transitioning from single state to multi-dimensional state, introduce enum
 
 
-Class Design:
+**Class Design:**
 
 1. Start Class Design from Higher Component of System to Lower Component of System
 
@@ -51,7 +51,7 @@ Class Design:
 4. While writing Properties or Behavior, look at each Concrete Requirements
 
 
-Implementation:
+**Implementation:**
 
 1. For each Behavior/Method, follow this pattern:
    - Define Core Logic: Happy path that fulfills the requirement 

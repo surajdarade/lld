@@ -55,7 +55,7 @@ Scope Boundaries:
 8. Requests for the current floor are treated as a no-operation/already served (doors out of scope)
 
 
-Out of Scope:
+**Out of Scope:**
 
 - Weight Capacity and Passanger Limits
 - Door Open/Close Mechanics
@@ -71,9 +71,10 @@ Out of Scope:
 - Request
 - ElevatorController
 
-Unnecessary to Current Set of Requirements
-
+**Unnecessary to Current Set of Requirements**
 - Floor
 
 
 # STEP 3: CLASS DESIGN
+
+
