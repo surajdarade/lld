@@ -114,9 +114,9 @@ class Compartment:
 
 ```text
 enum Size:
-    SMALL 
-    MEDIUM 
-    LARGE 
+   SMALL 
+   MEDIUM 
+   LARGE 
 ```
 
 
