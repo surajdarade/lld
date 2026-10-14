@@ -1,4 +1,11 @@
-# APPROACH:
+# RESOURCE(S)
+
+
+https://www.hellointerview.com/learn/low-level-design/in-a-hurry/delivery#1-requirements-5-minutes
+
+
+# APPROACH
+
 
 1. Requirements
 
@@ -11,7 +18,8 @@
 5. Extensibility
 
 
-# TIPS:
+# TIPS
+
 
 **Requirements:**
 
@@ -64,6 +72,7 @@
    - Helpers mostly have Private Visibility
 
 
-# NOTE:
+# NOTE
+
 
 You can always go back and modify Entities/Class Design/Implementation upon discussion with interviewer.
