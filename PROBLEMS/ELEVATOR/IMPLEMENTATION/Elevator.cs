@@ -9,7 +9,7 @@ public class Elevator {
 
     public Elevator() {
         _currentFloor = 0;
-        _direction = Direction.Idle;
+        _direction = Direction.IDLE;
         _requests = new HashSet<Request>();
     }
 
@@ -29,11 +29,11 @@ public class Elevator {
 
     public void Step() {
         if (_requests.Count == 0) {
-            _direction = Direction.Idle;
+            _direction = Direction.IDLE;
             return;
         }
 
-        if (_direction == Direction.Idle) {
+        if (_direction == Direction.IDLE) {
             // Find nearest request to establish initial direction (deterministic)
             Request nearest = null;
             int minDistance = int.MaxValue;
@@ -58,7 +58,7 @@ public class Elevator {
             _requests.Remove(destinationRequest);
 
             if (_requests.Count == 0) {
-                _direction = Direction.Idle;
+                _direction = Direction.IDLE;
             }
             return;
         }

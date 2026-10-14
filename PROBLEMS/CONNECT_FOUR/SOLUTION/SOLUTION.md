@@ -1,7 +1,7 @@
 # RESOURCE(S)
 
 
-https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/connect-four
+[https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/connect-four](https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/connect-four)
 
 
 # PROBLEM STATEMENT
@@ -255,15 +255,17 @@ class Board:
 
 1. How would you support different board sizes?
 
-Construct the board with desired rows and columns
+
+- Construct the board with desired rows and columns
 
 
 2. How would you add undo or move history?
 
-Undo belongs in `Game` because `Game` controls the lifecycle, turn order and when state changes
-I'd keep a `moveHistory` stack. Each time a move succeeds, I push a small `Move` record containing player, row and column
-Undo would pop the last move, clear that cell in the board, revent `currentPlayer` and recalculate game state if needed
-The board does'nt need any new logic besides maybe an internal `ClearCell` method
+
+- Undo belongs in `Game` because `Game` controls the lifecycle, turn order and when state changes
+- I'd keep a `moveHistory` stack. Each time a move succeeds, I push a small `Move` record containing player, row and column
+- Undo would pop the last move, clear that cell in the board, revent `currentPlayer` and recalculate game state if needed
+- The board does'nt need any new logic besides maybe an internal `ClearCell` method
 
 
 ```text
@@ -313,9 +315,10 @@ class Game:
 
 3. How would you add a computer opponent?
 
-I'd keep the game reuls exactly where they are. `Game` and `Board` doesn't need to change
-I'd introduce a small bot component that looks at the current board and returns a column
-From `Game's` persepctive, a bot move is just another call to `MakeMove(currentPlayer, column)`
+
+- I'd keep the game reuls exactly where they are. `Game` and `Board` doesn't need to change
+- I'd introduce a small bot component that looks at the current board and returns a column
+- From `Game's` persepctive, a bot move is just another call to `MakeMove(currentPlayer, column)`
 
 
 ```text
@@ -356,4 +359,5 @@ while (game.GetGameState() == GameState.IN_PROGRESS)_
 
 **Optional:**
 
-Might introduce `Player` interface and concrete implementations, `HumanPlayer` or `BotPlayer`, etc
+
+- Might introduce `Player` interface and concrete implementations, `HumanPlayer` or `BotPlayer`, etc

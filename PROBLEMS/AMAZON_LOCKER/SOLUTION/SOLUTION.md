@@ -1,7 +1,7 @@
 # RESOURCE(S)
 
 
-https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker
+[https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker](https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/amazon-locker)
 
 
 # PROBLEM STATEMENT
@@ -290,7 +290,7 @@ class Compartment:
 
 3. How would you ensure packages are actually deposited before generating access tokens?
 
-Two-Phased Commit 
+- Two-Phased Commit 
 
 ```text
 class Locker:

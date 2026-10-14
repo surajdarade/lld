@@ -1,7 +1,7 @@
 # RESOURCE(S)
 
 
-https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/elevator
+[https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/elevator](https://www.hellointerview.com/learn/low-level-design/problem-breakdowns/elevator)
 
 
 # PROBLEM STATEMENT
@@ -11,7 +11,7 @@ Design an Elevator Control System for a building. The syttem should handle multi
 and move elevators efficiently to serve requests.
 
 
-Primary Capabilities:
+**Primary Capabilities:**
 
 - How many elevators and floors? Fixed or Configurable?
 
@@ -19,13 +19,13 @@ Primary Capabilities:
 
 - Can passanger select multiple destination floors inside the Elevator?
 
-Error/Edge Case Handling:
+**Error/Edge Case Handling:**
 
 - What about invalid floor requests?
 
 - What if someone requests the floor they're already on?
 
-Scope Boundaries:
+**Scope Boundaries:**
 
 - Capacity, Weight Limits, Door Mechanics, Emergency Stops?
 
@@ -326,6 +326,7 @@ class Elevator:
 
 1. What if multiple hall calls come in at the same time? What if a hall call comes in while step is running?
 
+
 - Use lock, acquire and release the lock
 
 ```text
@@ -361,6 +362,7 @@ public void Step():
 
 2. How would you add a priority floors or an express elevator?
 
+
 - Use `isExpress` property in elevator
 - Use array of priorityFloors in express elevator
 
@@ -372,6 +374,7 @@ class Elevator:
 
 
 3. How would add the ability to cancel a floor request?
+
 
 - Provide a method to remove request
 

@@ -82,7 +82,7 @@ public class ElevatorController {
         var minDistance = int.MaxValue;
 
         foreach (var e in _elevators) {
-            if (e.Direction != Direction.Idle) {
+            if (e.Direction != Direction.IDLE) {
                 continue;
             }
 
