@@ -195,255 +195,438 @@ class File extends FileSystemEntry:
 
 ```text
 class FileSystem:
-    public FileSystem():
-        """
-        Core Logic:
-        1. Create the root directory with an empty internal name and no parent.
-        2. Initialize the global reader/writer lock.
-
-        Error/Edge Case(s):
-        1. Construction failure prevents a usable instance from being returned.
-        """
-
     public Directory CreateDirectory(parentPath, name):
         """
         Core Logic:
-        1. Validate the name before taking the write lock.
-        2. Acquire the write lock, resolve the parent path and require a directory.
-        3. Reject a duplicate sibling name.
-        4. Create the directory and register it in the parent.
+        1. Validate the name before acquiring the write lock.
+        2. Acquire the write lock and resolve the parent directory.
+        3. Reject an existing child with the same name.
+        4. Create the directory and add it to the parent.
 
         Error/Edge Case(s):
-        1. Invalid path or name -> reject without mutation.
-        2. Missing parent -> reject.
-        3. Parent is a file or sibling name exists -> reject.
+        1. Invalid path or name -> throw error.
+        2. Parent does not exist or is a file -> throw error.
+        3. Duplicate name -> reject without mutation.
         """
+
+        ValidateName(name)
+
+        acquire writeLock
+
+        try:
+            parent = RequireDirectory(ResolvePathUnsafe(parentPath))
+
+            EnsureNameAvailable(parent, name)
+
+            directory = Directory(name, parent)
+
+            parent.AddChild(directory)
+
+            return directory
+        finally:
+            release writeLock
+
 
     public File CreateFile(parentPath, name, content):
         """
         Core Logic:
-        1. Validate the name and non-null content.
-        2. Acquire the write lock, resolve the parent and require a directory.
-        3. Reject a duplicate sibling name.
-        4. Create the file and register it in the parent.
+        1. Validate the name and content.
+        2. Acquire the write lock and resolve the parent directory.
+        3. Reject an existing child with the same name.
+        4. Create the file and add it to the parent.
 
         Error/Edge Case(s):
-        1. Invalid input, missing parent, wrong parent type or duplicate name -> reject without mutation.
+        1. Invalid input or missing parent -> throw error.
+        2. Parent is a file or name already exists -> reject.
+        3. Failed creation must not leave a partial entry.
         """
+
+        ValidateName(name)
+
+        if (content == null)
+            throw Error("Content Cannot Be Null")
+
+        acquire writeLock
+
+        try:
+            parent = RequireDirectory(ResolvePathUnsafe(parentPath))
+
+            EnsureNameAvailable(parent, name)
+
+            file = File(name, parent, content)
+
+            parent.AddChild(file)
+
+            return file
+        finally:
+            release writeLock
+
 
     public FileSystemEntry ResolvePath(absolutePath):
         """
         Core Logic:
         1. Acquire the read lock.
-        2. Validate the strict absolute path and traverse from root.
-        3. Return the resolved entry reference.
+        2. Validate the absolute path.
+        3. Traverse the hierarchy from the root.
+        4. Return the resolved entry.
 
         Error/Edge Case(s):
-        1. Malformed path or missing component -> reject.
-        2. Traversal through a file -> reject.
-        3. The reference may become stale after return and must be revalidated for later operations.
+        1. Invalid path or missing component -> throw error.
+        2. Traversal through a file -> throw error.
+        3. The returned reference may become stale after the lock is released.
         """
+
+        acquire readLock
+
+        try:
+            return ResolvePathUnsafe(absolutePath)
+        finally:
+            release readLock
+
 
     public IReadOnlyList<FileSystemEntry> ListDirectory(absolutePath):
         """
         Core Logic:
-        1. Resolve the path under the read lock.
-        2. Require a directory.
-        3. Return a read-only snapshot of immediate children.
+        1. Acquire the read lock and resolve the path.
+        2. Require the resolved entry to be a directory.
+        3. Return a snapshot of its immediate children.
 
         Error/Edge Case(s):
-        1. Missing path or file target -> reject.
-        2. Later changes do not mutate the returned snapshot.
+        1. Missing path or file target -> throw error.
+        2. Later mutations must not change the returned snapshot.
         """
 
-    public string GetEntryName(entry):
-        """
-        Core Logic:
-        1. Acquire the read lock and validate the entry reference.
-        2. Return the entry name while the lock is held.
+        acquire readLock
 
-        Error/Edge Case(s):
-        1. Null, deleted or foreign reference -> reject.
-        """
+        try:
+            directory = RequireDirectory(ResolvePathUnsafe(absolutePath))
+
+            return ReadOnlySnapshot(directory.GetChildren())
+        finally:
+            release readLock
+
 
     public string ReadFile(absolutePath):
         """
         Core Logic:
-        1. Resolve the path under the read lock.
-        2. Require a file and return its complete content.
+        1. Acquire the read lock.
+        2. Resolve the path and require a file.
+        3. Return the complete file content.
 
         Error/Edge Case(s):
-        1. Missing path or directory target -> reject.
+        1. Missing path or directory target -> throw error.
         """
+
+        acquire readLock
+
+        try:
+            file = RequireFile(ResolvePathUnsafe(absolutePath))
+
+            return file.Content
+        finally:
+            release readLock
+
 
     public void ReplaceFileContent(absolutePath, content):
         """
         Core Logic:
         1. Reject null content.
-        2. Resolve the target under the write lock and require a file.
-        3. Replace the complete content with one assignment.
+        2. Acquire the write lock.
+        3. Resolve the path and require a file.
+        4. Replace the complete content.
 
         Error/Edge Case(s):
-        1. Missing path, directory target or invalid content -> reject without changing content.
+        1. Null content, missing path or directory target -> reject.
+        2. Failed validation must leave the original content unchanged.
         """
+
+        if (content == null)
+            throw Error("Content Cannot Be Null")
+
+        acquire writeLock
+
+        try:
+            file = RequireFile(ResolvePathUnsafe(absolutePath))
+
+            file.ReplaceContent(content)
+        finally:
+            release writeLock
+
 
     public void Delete(entry):
         """
         Core Logic:
-        1. Acquire the write lock and validate the reference.
+        1. Acquire the write lock and validate the entry reference.
         2. Reject the root and non-empty directories.
-        3. Remove the entry from its parent and mark it inactive.
+        3. Remove the entry from its parent.
+        4. Mark the entry inactive.
 
         Error/Edge Case(s):
-        1. Null, stale or foreign reference -> reject.
+        1. Null, stale or foreign reference -> throw error.
         2. Root or non-empty directory -> reject without mutation.
         """
+
+        acquire writeLock
+
+        try:
+            ValidateEntryActive(entry)
+
+            if (entry == root)
+                throw Error("Cannot Delete Root")
+
+            if (entry is Directory && !entry.IsEmpty())
+                throw Error("Directory Is Not Empty")
+
+            parent = entry.Parent
+
+            parent.RemoveChild(entry.Name)
+
+            entry.MarkDeleted()
+        finally:
+            release writeLock
+
 
     public void Rename(entry, newName):
         """
         Core Logic:
-        1. Validate the name and acquire the write lock.
-        2. Validate the reference and reject the root.
-        3. Treat the same name as a no-op and reject sibling collisions.
-        4. Replace the old parent dictionary key and entry name.
-        5. Restore the original key and name if insertion fails.
+        1. Validate the new name and acquire the write lock.
+        2. Validate the entry and reject the root.
+        3. Treat the same name as a no-op.
+        4. Reject a sibling name collision.
+        5. Replace the old dictionary key and update the entry name.
+        6. Roll back if inserting the new key fails.
 
         Error/Edge Case(s):
-        1. Invalid name, stale/foreign reference, root or duplicate name -> reject.
-        2. Failure after removing the old key triggers rollback before releasing the lock.
+        1. Invalid name, stale reference or root -> reject.
+        2. Duplicate sibling name -> reject without mutation.
+        3. Failed insertion -> restore the original name and mapping.
         """
+
+        ValidateName(newName)
+
+        acquire writeLock
+
+        try:
+            ValidateEntryActive(entry)
+
+            if (entry == root)
+                throw Error("Cannot Rename Root")
+
+            if (entry.Name == newName)
+                return
+
+            parent = entry.Parent
+
+            EnsureNameAvailable(parent, newName)
+
+            oldName = entry.Name
+
+            parent.RemoveChild(oldName)
+
+            try:
+                entry.SetName(newName)
+
+                parent.AddChild(entry)
+            catch:
+                entry.SetName(oldName)
+
+                parent.AddChild(entry)
+
+                throw
+        finally:
+            release writeLock
+
 
     public void Move(entry, destinationDirectory):
         """
         Core Logic:
         1. Acquire the write lock and validate both references.
-        2. Reject the root, same-parent moves, name collisions and directory cycles.
-        3. Remove the entry from the old parent.
-        4. Update its parent and insert it into the destination.
-        5. Restore the old parent and mapping if insertion fails.
+        2. Reject the root, same-parent moves and directory cycles.
+        3. Reject a destination name collision.
+        4. Remove the entry from its old parent.
+        5. Update its parent and add it to the destination.
+        6. Roll back if the destination insertion fails.
 
         Error/Edge Case(s):
-        1. Null, stale or foreign references -> reject.
-        2. Invalid destination, root move, cycle or collision -> reject without mutation.
-        3. Readers cannot observe the intermediate state because the write lock is held throughout.
+        1. Null, stale or foreign reference -> reject.
+        2. Invalid destination, root move, cycle or collision -> reject.
+        3. Rollback restores the original parent and mapping.
+        4. The write lock prevents readers from observing an intermediate state.
         """
+
+        acquire writeLock
+
+        try:
+            ValidateEntryActive(entry)
+            ValidateEntryActive(destinationDirectory)
+
+            destination = RequireDirectory(destinationDirectory)
+
+            if (entry == root)
+                throw Error("Cannot Move Root")
+
+            if (entry.Parent == destination)
+                throw Error("Entry Already Has This Parent")
+
+            if (entry is Directory &&
+                IsWithinSubtree(destination, entry))
+                throw Error("Cannot Move Directory Into Its Subtree")
+
+            EnsureNameAvailable(destination, entry.Name)
+
+            oldParent = entry.Parent
+            oldName = entry.Name
+
+            oldParent.RemoveChild(oldName)
+
+            try:
+                entry.SetParent(destination)
+
+                destination.AddChild(entry)
+            catch:
+                entry.SetParent(oldParent)
+
+                oldParent.AddChild(entry)
+
+                throw
+        finally:
+            release writeLock
+
 
     public string GetFullPath(entry):
         """
         Core Logic:
-        1. Validate the reference under the read lock.
-        2. Return "/" for the root; otherwise follow parent references and collect names.
-        3. Return the components in root-to-entry order.
+        1. Acquire the read lock and validate the reference.
+        2. Return "/" for the root.
+        3. Follow parent references and collect entry names.
+        4. Reverse the names and construct the absolute path.
 
         Error/Edge Case(s):
-        1. Null, stale or foreign reference -> reject.
-        2. The read lock prevents a concurrent move or rename from producing a mixed path.
+        1. Null, stale or foreign reference -> throw error.
+        2. The read lock prevents concurrent rename or move from producing a mixed path.
         """
+
+        acquire readLock
+
+        try:
+            ValidateEntryActive(entry)
+
+            if (entry == root)
+                return "/"
+
+            names = []
+
+            current = entry
+
+            while (current != root):
+                names.Add(current.Name)
+
+                current = current.Parent
+
+            Reverse(names)
+
+            return "/" + Join(names, "/")
+        finally:
+            release readLock
+
 
     private FileSystemEntry ResolvePathUnsafe(path):
         """
         Core Logic:
-        1. Parse strict absolute path components.
-        2. Traverse child dictionaries from root.
-        3. Return the final entry.
+        1. Validate and split the absolute path into components.
+        2. Start from the root.
+        3. Traverse each component through the current directory.
+        4. Return the final entry.
 
         Error/Edge Case(s):
-        1. Malformed path or missing child -> reject.
-        2. An intermediate file -> reject.
+        1. Malformed path or missing child -> throw error.
+        2. Intermediate entry is a file -> throw error.
         3. Caller must already hold the read or write lock.
         """
+
+        components = ValidateAbsolutePath(path)
+
+        current = root
+
+        for component in components:
+            directory = RequireDirectory(current)
+
+            current = directory.GetChild(component)
+
+            if (current == null)
+                throw Error("Path Does Not Exist")
+
+        return current
+
 
     private void ValidateEntryActive(entry):
         """
         Core Logic:
-        1. Reject null and inactive entries.
-        2. Follow parent references to this file system's root.
+        1. Reject null or inactive entries.
+        2. Follow parent references toward the root.
         3. Verify each parent contains the exact child under its current name.
+        4. Accept only references belonging to this file system.
 
         Error/Edge Case(s):
         1. Deleted or foreign reference -> reject.
-        2. Broken parent-child invariant -> reject.
+        2. Broken parent-child relationship -> reject.
         3. Caller must already hold the file-system lock.
         """
 
-    private void ValidateName(name):
-        """
-        Core Logic:
-        1. Reject null names.
-        2. Reject empty names, names containing '/' and the reserved names '.' and '..'.
+        if (entry == null || !entry.IsActive)
+            throw Error("Invalid Entry Reference")
 
-        Error/Edge Case(s):
-        1. Invalid name -> throw an argument exception before hierarchy mutation.
-        """
+        current = entry
+
+        while (current != root):
+            parent = current.Parent
+
+            if (parent == null ||
+                parent.GetChild(current.Name) != current)
+                throw Error("Invalid Entry Reference")
+
+            current = parent
+
 
     private string[] ValidateAbsolutePath(path):
         """
         Core Logic:
-        1. Require an absolute path beginning with '/'.
-        2. Resolve '/' to an empty component list.
-        3. Reject trailing or repeated separators and '.' or '..' components.
-        4. Return the validated components.
+        1. Require a path beginning with "/".
+        2. Treat "/" as the root.
+        3. Split the path into components.
+        4. Reject empty components, "." and "..".
+        5. Return the validated components.
 
         Error/Edge Case(s):
-        1. Null, relative or malformed path -> reject.
+        1. Null, relative, repeated-separator or trailing-separator path -> reject.
+        2. Root "/" is valid.
         """
 
-    private void EnsureNameAvailable(parent, name):
-        """
-        Core Logic:
-        1. Look up the name in the parent's child dictionary.
-        2. Allow the name only when no child exists under it.
+        if (path == null || !path.StartsWith("/"))
+            throw Error("Absolute Path Required")
 
-        Error/Edge Case(s):
-        1. Existing sibling with the same case-sensitive name -> reject.
-        """
+        if (path == "/")
+            return []
 
-    private Directory RequireDirectory(entry):
-        """
-        Core Logic:
-        1. Return the entry when it is a Directory.
+        if (path.EndsWith("/") || path.Contains("//"))
+            throw Error("Malformed Path")
 
-        Error/Edge Case(s):
-        1. File supplied where a directory is required -> reject.
-        """
+        components = Split(path.Substring(1), "/")
 
-    private File RequireFile(entry):
-        """
-        Core Logic:
-        1. Return the entry when it is a File.
+        for component in components:
+            if (component == "." || component == "..")
+                throw Error("Invalid Path Component")
 
-        Error/Edge Case(s):
-        1. Directory supplied where a file is required -> reject.
-        """
-
-    private bool IsWithinSubtree(candidate, ancestor):
-        """
-        Core Logic:
-        1. Walk from the candidate through its parent references.
-        2. Return true if the ancestor is encountered; otherwise return false.
-
-        Error/Edge Case(s):
-        1. A candidate within the moved directory's subtree -> reject the move to prevent a cycle.
-        """
+        return components
 ```
 
 
 ```text
 class Directory extends FileSystemEntry:
-    internal Directory(name, parent):
-        """
-        Core Logic:
-        1. Initialize the shared entry state.
-        2. Initialize an empty child dictionary using ordinal, case-sensitive name comparison.
-
-        Error/Edge Case(s):
-        1. Construction with an invalid name or parent relationship -> reject.
-        """
-
     internal FileSystemEntry? GetChild(name):
         """
         Core Logic:
-        1. Perform a case-sensitive dictionary lookup.
+        1. Look up the child by its case-sensitive name.
         2. Return the child or null.
 
         Error/Edge Case(s):
@@ -451,27 +634,25 @@ class Directory extends FileSystemEntry:
         2. Caller must hold the file-system lock.
         """
 
-    internal FileSystemEntry[] GetChildren():
-        """
-        Core Logic:
-        1. Copy the immediate child values into an array snapshot.
-        2. Return the snapshot without exposing the mutable dictionary.
+        return children.GetValueOrDefault(name)
 
-        Error/Edge Case(s):
-        1. Empty directory -> return an empty array.
-        2. Caller must hold the file-system lock while creating the snapshot.
-        """
 
     internal void AddChild(entry):
         """
         Core Logic:
-        1. Verify the entry is active and its parent is this directory.
-        2. Add it under its name without overwriting an existing child.
+        1. Verify the entry's parent is this directory.
+        2. Add the entry under its name without overwriting another child.
 
         Error/Edge Case(s):
         1. Duplicate name or inconsistent parent -> reject.
         2. Caller must hold the write lock.
         """
+
+        if (entry.Parent != this)
+            throw Error("Invalid Parent")
+
+        children.Add(entry.Name, entry)
+
 
     internal FileSystemEntry RemoveChild(name):
         """
@@ -479,75 +660,72 @@ class Directory extends FileSystemEntry:
         1. Remove and return the child associated with the name.
 
         Error/Edge Case(s):
-        1. Missing child -> reject.
+        1. Missing child -> throw error.
         2. Caller must hold the write lock.
         """
+
+        if (!children.ContainsKey(name))
+            throw Error("Child Does Not Exist")
+
+        return children.RemoveAndReturn(name)
 ```
 
 
 ```text
 abstract class FileSystemEntry:
-    internal FileSystemEntry(name, parent):
-        """
-        Core Logic:
-        1. Store the name and parent reference.
-        2. Initialize the entry as active.
-
-        Error/Edge Case(s):
-        1. Invalid construction arguments -> reject.
-        2. Only the root directory may have a null parent.
-        """
-
     internal void SetName(name):
         """
         Core Logic:
-        1. Update the internal name after coordinator validation.
+        1. Update the entry name during a validated rename.
 
         Error/Edge Case(s):
-        1. Caller must hold the write lock and coordinate the parent dictionary.
+        1. Caller must hold the write lock and coordinate the parent mapping.
         """
+
+        this.name = name
+
 
     internal void SetParent(parent):
         """
         Core Logic:
-        1. Update the parent reference during a coordinated move.
+        1. Update the parent reference during a move.
 
         Error/Edge Case(s):
-        1. Caller must hold the write lock and update the matching child dictionaries.
+        1. Caller must hold the write lock and coordinate both parent mappings.
         """
+
+        this.parent = parent
+
 
     internal void MarkDeleted():
         """
         Core Logic:
-        1. Mark the removed entry inactive.
+        1. Mark the entry inactive after removing it from its parent.
 
         Error/Edge Case(s):
-        1. The coordinator must first validate and remove the entry under the write lock.
+        1. Caller must validate and remove the entry under the write lock.
         """
+
+        this.isActive = false
 ```
 
 
 ```text
 class File extends FileSystemEntry:
-    internal File(name, parent, content):
-        """
-        Core Logic:
-        1. Initialize the shared entry state.
-        2. Store the initial string content.
-
-        Error/Edge Case(s):
-        1. Null content -> reject.
-        """
-
     internal void ReplaceContent(content):
         """
         Core Logic:
-        1. Replace the entire stored string.
+        1. Replace the entire stored content.
 
         Error/Edge Case(s):
         1. Null content -> reject.
-        2. Caller must hold the write lock and validate the entry's lifecycle.
+        2. Caller must hold the write lock.
         """
+
+        if (content == null)
+            throw Error("Content Cannot Be Null")
+
+        this.content = content
 ```
 
 
