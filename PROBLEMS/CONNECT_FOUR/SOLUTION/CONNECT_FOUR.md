@@ -263,7 +263,7 @@ class Board:
 - Undo belongs in `Game` because `Game` controls the lifecycle, turn order and when state changes
 - I'd keep a `moveHistory` stack. Each time a move succeeds, I push a small `Move` record containing player, row and column
 - Undo would pop the last move, clear that cell in the board, revent `currentPlayer` and recalculate game state if needed
-- The board does'nt need any new logic besides maybe an internal `ClearCell` method
+- The board doesn't need any new logic besides maybe an internal `ClearCell` method
 
 
 ```text
