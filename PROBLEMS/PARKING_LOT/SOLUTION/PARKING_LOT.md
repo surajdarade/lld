@@ -7,7 +7,7 @@
 # PROBLEM STATEMENT
 
 
-Design an in-memory file system that supports creating files and directories, navigating paths and basic file operations.
+Design a parking lot system where different types of vehicles can park, and the system manages spot assignment and calculates fees upon exit.
 
 
 **Primary Capabilities:**
