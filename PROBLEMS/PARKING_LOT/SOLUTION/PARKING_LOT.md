@@ -7,7 +7,7 @@
 # PROBLEM STATEMENT
 
 
-Design an in-memory Parking Lot System that assigns compatible spots to arriving vehicles, issues tickets, calculates parking fees when vehicles leave and makes spots available again.
+Design an in-memory file system that supports creating files and directories, navigating paths and basic file operations.
 
 
 **Primary Capabilities:**
