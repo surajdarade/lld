@@ -92,13 +92,6 @@ Design an in-memory Parking Lot System that assigns compatible spots to arriving
 - `SystemClock`
   - Production implementation of `IClock` using UTC system time.
 
-
-**Enums:**
-
-- `VehicleType`: `Motorcycle`, `Car`, `LargeVehicle`.
-- `SpotSize`: `Motorcycle`, `Car`, `Large`.
-- `TicketStatus`: `Active`, `Completed`.
-
 **Unnecessary to Current Set of Requirements:**
 
 - `ParkingFloor`: no floor-specific behavior is required.
@@ -458,7 +451,7 @@ class ParkingSpot:
       if vehicleType == VehicleType.CAR:
          return size == SpotSize.CAR or size == SpotSize.LARGE
 
-      if vehicleType == LargeVehicle:
+      if vehicleType == VehicleType.LARGE_VEHICLE:
          return size == SpotSize.LARGE
 
       return false
@@ -607,7 +600,7 @@ class ParkingTicket:
       1. Ticket already Completed -> throw InvalidOperationException.
       """
 
-      if status != Active:
+      if status != TicketStatus.ACTIVE:
          throw InvalidOperationException
 
       status = Completed
