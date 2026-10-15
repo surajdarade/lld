@@ -253,14 +253,12 @@ class Board:
 # STEP 5: EXTENSIBILITY
 
 
-1. How would you support different board sizes?
-
+**1. How would you support different board sizes?**
 
 - Construct the board with desired rows and columns
 
 
-2. How would you add undo or move history?
-
+**2. How would you add undo or move history?**
 
 - Undo belongs in `Game` because `Game` controls the lifecycle, turn order and when state changes
 - I'd keep a `moveHistory` stack. Each time a move succeeds, I push a small `Move` record containing player, row and column
@@ -313,8 +311,7 @@ class Game:
 ```
 
 
-3. How would you add a computer opponent?
-
+**3. How would you add a computer opponent?**
 
 - I'd keep the game reuls exactly where they are. `Game` and `Board` doesn't need to change
 - I'd introduce a small bot component that looks at the current board and returns a column
@@ -358,6 +355,5 @@ while (game.GetGameState() == GameState.IN_PROGRESS)_
 
 
 **Optional:**
-
 
 - Might introduce `Player` interface and concrete implementations, `HumanPlayer` or `BotPlayer`, etc

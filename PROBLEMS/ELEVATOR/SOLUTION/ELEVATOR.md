@@ -324,8 +324,7 @@ class Elevator:
 # STEP 5: EXTENSIBILITY
 
 
-1. What if multiple hall calls come in at the same time? What if a hall call comes in while step is running?
-
+**1. What if multiple hall calls come in at the same time? What if a hall call comes in while step is running?**
 
 - Use lock, acquire and release the lock
 
@@ -360,8 +359,7 @@ public void Step():
 ```
 
 
-2. How would you add a priority floors or an express elevator?
-
+**2. How would you add a priority floors or an express elevator?**
 
 - Use `isExpress` property in elevator
 - Use array of priorityFloors in express elevator
@@ -373,8 +371,7 @@ class Elevator:
 ```
 
 
-3. How would add the ability to cancel a floor request?
-
+**3. How would add the ability to cancel a floor request?**
 
 - Provide a method to remove request
 

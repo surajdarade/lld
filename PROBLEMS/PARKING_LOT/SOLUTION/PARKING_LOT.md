@@ -35,43 +35,29 @@ Design a parking lot system where different types of vehicles can park, and the 
 # STEP 1: REQUIREMENTS
 
 
-1. The system supports three vehicle types: Motorcycle, Car, and Large Vehicle.
+1. System supports three vehicle types: Motorcycle, Car, Large Vehicle
 
-2. When a vehicle enters, the system automatically assigns an available compatible spot.
-   - A vehicle can use a spot of the same size or larger.
-   - Compatibility: Motorcycle -> Motorcycle, Car, or Large; Car -> Car or Large; Large Vehicle -> Large only.
-   - The first available compatible spot in the configured order is selected.
+2. When a vehicle enters, system automatically assigns an available compatible spot
 
-3. The system issues a ticket at entry.
-   - The ticket contains a unique ID, vehicle, assigned spot ID, UTC entry time, and lifecycle status.
+3. System issues a ticket at entry.
 
-4. When a vehicle exits, the caller supplies the ticket ID.
-   - The system validates that the ticket exists and is active.
-   - The fee is based on elapsed time, rounded up to whole hours.
-   - A minimum of one billable hour applies, including a zero-duration stay.
-   - The assigned spot is released only after the exit has been validated.
+4. When a vehicle exits, user provides ticket ID
+   - System validates the ticket
+   - Calculates fee based on time spent (hourly, rounded up)
+   - Frees the spot for next use
 
-5. All vehicle types use the same hourly rate.
+5. Pricing is hourly with same rate for all vehicles
 
-6. Entry is rejected when no compatible spot is available. A rejected entry does not create a ticket or change occupancy.
+6. System rejects entry if no compatible spot is available
 
-7. Exit is rejected when the ticket ID is invalid or has already been used. A rejected exit does not change ticket or spot state.
+7. System rejects exit if ticket is invalid or already used
 
-8. Exit is rejected if the current time precedes the ticket's entry time.
-
-9. Time is supplied through an injectable clock and normalized to UTC.
-
-10. Concurrent entry and exit calls from multiple threads in the same process must preserve the system invariants.
-
-
-**Out of Scope:**
-
-- Payment processing or payment collection.
-- Physical gates, cameras, monitoring and UI/display systems.
-- Reservations or pre-booking.
-- Persistence and recovery after process failure.
-- Multi-process/distributed coordination.
-- Multiple pricing plans, vehicle-specific rates or rate changes over time.
+Out of scope:
+- Payment processing
+- Physical gate hardware
+- Security cameras or monitoring
+- UI/display systems
+- Reservations or pre-booking
 
 
 # STEP 2: ENTITIES
@@ -650,94 +636,56 @@ class ParkingFeeCalculator:
 # STEP 5: EXTENSIBILITY
 
 
-## 1. What if multiple entry/exit calls happen concurrently, or an exit occurs while an entry is running?
+**1. How would you support different pricing strategies?**
+
+- I'd introduce an `IPricingStrategy` when we need different pricing rules, such as vehicle-specific rates or weekend pricing.
+- `ParkingLot` would use the selected strategy to calculate fees.
+- For the current requirements, the existing `ParkingFeeCalculator` is enough.
+
+```text
+interface IPricingStrategy:
+    CalculateFee(EntryTimeUtc, ExitTimeUtc, Context) -> decimal
+
+class FlatHourlyPricingStrategy implements IPricingStrategy:
+    CalculateFee(EntryTimeUtc, ExitTimeUtc, Context) -> decimal
+```
 
 
-**Chosen approach: one private lock per ParkingLot.**
+**2. How would you support multiple floors or zones?**
 
-- `EnterVehicle` holds the lock while selecting a spot, marking it occupied, creating/registering the ticket and completing rollback if registration fails.
-- `ExitVehicle` holds the same lock while validating the ticket, calculating the fee, marking the ticket completed, and releasing the spot.
-- No public API exposes the mutable spot reference or occupancy flag, so callers cannot bypass this synchronization boundary.
+- I'd introduce a `ParkingFloor` or `ParkingZone` to manage its own spots.
+- `ParkingLot` would coordinate spot allocation across floors or zones.
+- I'd preserve the configured spot order so allocation remains predictable.
 
-**Trade-off:**
-
-The design favors a simple correctness argument over maximum parallelism. Two operations on the same lot wait for one another even when they concern different spots. This is appropriate for the stated in-memory interview scope. If throughput becomes a measured problem, the synchronization model can be refined only after defining lock ordering and proving cross-object invariants.
-
-**Why not a concurrent queue?**
-
-A concurrent queue makes enqueue/dequeue thread-safe, but it does not make the full allocation-and-occupancy workflow atomic. It would also introduce pending versus active request semantics that the current requirements do not need.
+```text
+class ParkingFloor:
+    - spots: List<ParkingSpot>
+    + FindAvailableSpot(VehicleType) -> ParkingSpot?
+```
 
 
-## 2. What invariants must always hold?
+**3. How would you persist parking state and recover after a restart?**
+
+- I'd introduce a repository to store spots and tickets in a database.
+- Entry and exit would update the ticket and spot together in a transaction.
+- This would allow the system to recover its state after a restart.
+
+```text
+interface IParkingRepository:
+    SaveEntry(Ticket, Spot) -> void
+    CompleteExit(TicketId, Fee) -> void
+```
 
 
-1. A spot is assigned to at most one active ticket.
-2. An Active ticket's assigned spot is occupied.
-3. A Completed ticket cannot be exited again.
-4. A rejected entry does not occupy a spot or create a ticket.
-5. A rejected exit does not complete a ticket or release a spot.
-6. Ticket IDs are unique within the lifetime of this in-memory lot.
-7. All state transitions across the ticket registry and spots occur under the same lot lock.
+**4. How would you increase concurrency if one lock becomes a bottleneck?**
+
+- I'd first check whether the single lock is actually slowing the system down.
+- If it is, I'd introduce finer-grained locks, such as locks for individual spots or groups of spots.
+- I'd make sure the entry and exit operations remain atomic and that locks cannot cause deadlocks.
 
 
-## 3. Race trace: two vehicles compete for one spot
+**5. How would you handle concurrent requests across multiple application instances?**
 
-
-1. Thread A calls `EnterVehicle`.
-2. Thread A acquires `_syncLock` and selects the only compatible spot.
-3. Thread B calls `EnterVehicle` and waits for `_syncLock`.
-4. Thread A marks the spot occupied and registers its ticket, then releases the lock.
-5. Thread B acquires the lock and finds no compatible available spot.
-6. Thread B is rejected; the spot has only one active ticket.
-
-The lock serializes the complete transaction, not merely individual collection operations.
-
-
-## 4. Liveness and lock discipline
-
-
-- The critical sections contain only in-memory work and a clock read; they perform no network calls or blocking I/O.
-- The lock is acquired through the language's `lock` construct, which releases it when the scope exits, including exceptional paths.
-- Do not call arbitrary user callbacks while holding the lock.
-- The design does not guarantee fairness between waiting threads; fairness is not required by the current specification.
-
-
-## 5. Visibility and lifecycle
-
-
-- Occupancy is internal and accessed by `ParkingLot` while it holds the lock.
-- Ticket completion is internal. `Status` is read atomically to avoid a torn/stale integer state observation.
-- Ticket history is retained for the process lifetime to reject duplicate exits. A production system would need an explicit retention/archival policy.
-- Process termination loses all in-memory tickets and occupancy state; durable recovery is out of scope.
-
-
-## 6. Concurrent verification / stress-test concept
-
-
-No test project is included in this deliverable, but a future test harness should verify:
-
-1. Many threads entering against a limited set of spots never cause more active tickets than available compatible spots.
-2. Concurrent attempts to exit the same ticket produce exactly one successful exit.
-3. A failed entry leaves all spot occupancy unchanged.
-4. A failed exit leaves ticket status and spot occupancy unchanged.
-5. Concurrent entry and exit operations preserve the invariants after every completed operation.
-6. Fee boundary cases: zero duration, exactly one hour, just over one hour, and exit-before-entry.
-7. Compatibility for every vehicle/spot-size pair.
-8. Deterministic allocation follows the configured spot order.
-
-
-## 7. Distributed boundary
-
-
-The lock protects only one `ParkingLot` object inside one process. It does not coordinate multiple processes or application instances. A distributed deployment would need a durable source of truth and an atomic claim/release operation (for example, a database transaction with an appropriate concurrency constraint). A process-local lock must not be presented as a distributed lock.
-
-
-## 8. Say this out loud in an interview
-
-
-- “I put the lock around the complete entry and exit workflows because the invariant spans the ticket registry and spot occupancy.”
-- “A concurrent collection alone would not make spot selection plus occupancy assignment atomic.”
-- “I retain completed tickets so a repeated exit is distinguishable from an unknown ticket.”
-- “I inject the clock because pricing is time-dependent and deterministic time is important for verification.”
-- “I chose one lock for correctness and clarity. I would only introduce finer-grained locking after measuring contention and defining a safe lock order.”
-- “This is thread-safe within one process; it does not solve coordination between multiple application instances.”
+- The current lock works only inside one application process.
+- I'd use a shared database to coordinate spot allocation across application instances.
+- A database transaction or conditional update would ensure that the same spot cannot be assigned to two active tickets.

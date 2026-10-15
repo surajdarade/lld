@@ -244,8 +244,8 @@ class Locker:
 # STEP 5: EXTENSIBILITY
 
 
-1. What if we want to allow a smaller package to use a large compartment as a fallback when all 
-   exact-size compartments are full?
+**1. What if we want to allow a smaller package to use a large compartment as a fallback when all 
+   exact-size compartments are full?**
 
 ```text
 private GetAvailableCompartment(RequestedSize):
@@ -264,7 +264,7 @@ private GetAvailableCompartment(RequestedSize):
 ```
 
 
-2. How would you handle compartments that are broken or under maintenance?
+**2. How would you handle compartments that are broken or under maintenance?**
 
 ```text
 enum CompartmentStatus:
@@ -288,7 +288,7 @@ class Compartment:
 ```
 
 
-3. How would you ensure packages are actually deposited before generating access tokens?
+**3. How would you ensure packages are actually deposited before generating access tokens?**
 
 - Two-Phased Commit 
 
