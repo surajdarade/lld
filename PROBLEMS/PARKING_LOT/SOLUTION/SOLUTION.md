@@ -137,6 +137,7 @@ class ParkingLot:
     - GenerateTicketId() -> string
 ```
 
+
 ```text
 class ParkingSpot:
     - id: string
@@ -149,6 +150,7 @@ class ParkingSpot:
     # Release() -> void
 ```
 
+
 ```text
 class Vehicle:
     - id: string
@@ -158,6 +160,7 @@ class Vehicle:
     + Id: string
     + Type: VehicleType
 ```
+
 
 ```text
 class ParkingTicket:
@@ -175,10 +178,12 @@ class ParkingTicket:
     # MarkCompleted() -> void
 ```
 
+
 ```text
 class ParkingFeeCalculator:
     + CalculateFee(EntryTimeUtc, ExitTimeUtc, HourlyRate) -> decimal
 ```
+
 
 ```text
 interface IClock:
@@ -187,6 +192,7 @@ interface IClock:
 class SystemClock implements IClock:
     + UtcNow: DateTimeOffset
 ```
+
 
 ```text
 enum VehicleType:
@@ -203,6 +209,7 @@ enum TicketStatus:
     ACTIVE
     COMPLETED
 ```
+
 
 **Design Decisions:**
 
@@ -253,20 +260,6 @@ enum TicketStatus:
 
 ```text
 class ParkingLot:
-   - parkingSpots: List<ParkingSpot>
-   - tickets: Dictionary<string, ParkingTicket>
-   - clock: IClock
-   - feeCalculator: ParkingFeeCalculator
-   - hourlyRate: decimal
-   - syncLock: object
-
-   + ParkingLot(parkingSpots, hourlyRate, clock, feeCalculator?)
-   + EnterVehicle(vehicle) -> ParkingTicket
-   + ExitVehicle(ticketId) -> decimal
-   - FindAvailableSpot(vehicleType) -> ParkingSpot?
-   - GenerateTicketId() -> string
-
-
    public ParkingLot(parkingSpots, hourlyRate, clock, feeCalculator?):
       """
       Core Logic:
@@ -416,18 +409,7 @@ class ParkingLot:
 
 ```text
 class ParkingSpot:
-   - id: string
-   - size: SpotSize
-   - isOccupied: boolean
-
-   + ParkingSpot(id, size)
-   + IsAvailable: boolean
-   + CanFit(vehicleType) -> boolean
-   # Occupy(vehicleType) -> void
-   # Release() -> void
-
-
-   public ParkingSpot(id, size):
+    public ParkingSpot(id, size):
       """
       Core Logic:
       1. Validate the spot ID.
@@ -524,20 +506,6 @@ class ParkingSpot:
 
 ```text
 class ParkingTicket:
-   - id: string
-   - vehicle: Vehicle
-   - assignedSpot: ParkingSpot
-   - entryTimeUtc: DateTimeOffset
-   - status: TicketStatus
-
-   + Id: string
-   + Vehicle: Vehicle
-   + SpotId: string
-   + EntryTimeUtc: DateTimeOffset
-   + Status: TicketStatus
-   # MarkCompleted() -> void
-
-
    internal ParkingTicket(id, vehicle, assignedSpot, entryTimeUtc):
       """
       Core Logic:
@@ -763,6 +731,7 @@ No test project is included in this deliverable, but a future test harness shoul
 6. Fee boundary cases: zero duration, exactly one hour, just over one hour, and exit-before-entry.
 7. Compatibility for every vehicle/spot-size pair.
 8. Deterministic allocation follows the configured spot order.
+
 
 ## 7. Distributed boundary
 
