@@ -39,13 +39,21 @@ Design an in-memory file system that supports creating files and directories, na
 
 
 1. Hierarchical file system with single root directory
+
 2. Files store string content
+
 3. Folders contain files and other folders
+
 4. Create and delete files and folders
+
 5. List contents of a folder
+
 6. Navigate/resolve absolute paths (e.g., /home/user/docs)
+
 7. Rename and move files and folders
+
 8. Retrieve full path from any file/folder reference
+
 9. Scale to tens of thousands of entries in memory
 
 Out of Scope:
