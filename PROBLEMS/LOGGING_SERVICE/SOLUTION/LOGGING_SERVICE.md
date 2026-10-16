@@ -51,7 +51,7 @@ Design a logging service that creates log records and writes them to one or more
 
 5. Concurrent calls are safe. A record's bytes never interleave with another record's bytes on the same destination.
 
-Out of scope:
+**Out of scope:**
 - Hot-reloading config at runtime
 - Async / buffered writes
 - Remote / network destinations in v1 (design should accomodate)
