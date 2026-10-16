@@ -13,7 +13,7 @@ public sealed class TokenBucketLimiter : Limiter
     public TokenBucketLimiter(RateLimitConfig config)
     {
         ArgumentNullException.ThrowIfNull(config);
-        if (config.Algorithm != LimiterAlgorithm.TokenBucket)
+        if (config.Algorithm != LimiterAlgorithm.TOCKEN_BUCKET)
             throw new ArgumentException("Token Bucket configuration is required.", nameof(config));
 
         config.Validate();

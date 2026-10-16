@@ -8,8 +8,8 @@ public sealed class LimiterFactory
 
         return config.Algorithm switch
         {
-            LimiterAlgorithm.TokenBucket => new TokenBucketLimiter(config),
-            LimiterAlgorithm.SlidingWindowLog => new SlidingWindowLogLimiter(config),
+            LimiterAlgorithm.TOCKEN_BUCKET => new TokenBucketLimiter(config),
+            LimiterAlgorithm.SLIDING_WINDOW_LOG => new SlidingWindowLogLimiter(config),
             _ => throw new ArgumentOutOfRangeException(nameof(config.Algorithm))
         };
     }

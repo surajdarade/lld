@@ -27,7 +27,7 @@ public sealed class RateLimitConfig
     {
         switch (Algorithm)
         {
-            case LimiterAlgorithm.TokenBucket:
+            case LimiterAlgorithm.TOCKEN_BUCKET:
                 if (Capacity <= 0)
                     throw new ArgumentOutOfRangeException(nameof(Capacity));
                 if (RefillRatePerSecond <= 0 ||
@@ -36,7 +36,7 @@ public sealed class RateLimitConfig
                     throw new ArgumentOutOfRangeException(nameof(RefillRatePerSecond));
                 break;
 
-            case LimiterAlgorithm.SlidingWindowLog:
+            case LimiterAlgorithm.SLIDING_WINDOW_LOG:
                 if (MaxRequests <= 0)
                     throw new ArgumentOutOfRangeException(nameof(MaxRequests));
                 if (WindowSizeMs <= 0)

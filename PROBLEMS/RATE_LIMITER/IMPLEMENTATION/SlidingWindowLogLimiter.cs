@@ -12,7 +12,7 @@ public sealed class SlidingWindowLogLimiter : Limiter
     public SlidingWindowLogLimiter(RateLimitConfig config)
     {
         ArgumentNullException.ThrowIfNull(config);
-        if (config.Algorithm != LimiterAlgorithm.SlidingWindowLog)
+        if (config.Algorithm != LimiterAlgorithm.SLIDING_WINDOW_LOG)
             throw new ArgumentException("Sliding Window Log configuration is required.", nameof(config));
 
         config.Validate();
