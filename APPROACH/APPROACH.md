@@ -28,6 +28,8 @@ https://www.hellointerview.com/learn/low-level-design/in-a-hurry/delivery#1-requ
    - Error/Edge Case Handling
    - Out of Scope
 
+2. Ask good or dumb questions to filter or the requirements
+
 
 **Entities:**
 
